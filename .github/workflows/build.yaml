@@ -27,7 +27,7 @@ jobs:
     - name: Install Zig
       uses: goto-bus-stop/setup-zig@v2.2.0
       with:
-        zig-version: ${{ inputs.zig_version }}
+        version: ${{ inputs.zig_version }}
 
     - name: Build
       working-directory: ${{ inputs.target }}
