@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Builtin to build
+        required: true
+        type: string
+      zig_verison:
+        description: Zig version to use
+        required: true
+        type: string
+      release_version:
+        description: Release version
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install Zig
+      uses: goto-bus-stop/setup-zig@v2.2.0
+      with:
+        zig-version: ${{ inputs.zig_version }}
+
+    - name: Build
+      working-directory: ${{ inputs.target }}
+      run: zig build --release=small
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ${{ inputs.target }}/zig-out/bin/${{ inputs.target }}.exe
+        tag_name: ${{ inputs.release_version }}
