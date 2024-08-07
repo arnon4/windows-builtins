@@ -25,6 +25,7 @@ pub fn main() void {
     }
 
     var current_arg = args.next();
+    var printed_help = false;
     if (std.mem.eql(u8, current_arg.?, "--help")) {
         current_arg = args.next();
         if (current_arg == null) {
@@ -34,11 +35,12 @@ pub fn main() void {
             stdout.print("--help ", .{}) catch {
                 exit(@intFromEnum(ERROR_CODES.WRITE_FAULT));
             };
+            printed_help = true;
         }
     }
 
     var i: usize = 0;
-    while (current_arg != null) : (i += 1) {
+    while (!printed_help and current_arg != null) : (i += 1) {
         if (current_arg.?[0] != '-') {
             break;
         }
