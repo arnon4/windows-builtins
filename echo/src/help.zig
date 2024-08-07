@@ -10,6 +10,8 @@ pub const ERROR_CODES = enum(u8) {
 
 pub fn help() ERROR_CODES {
     const help_string =
+        \\       echo --help display this help and exit
+        \\
         \\       echo [-neE] [arg ...]
         \\              Output  the  args, separated by spaces, followed by a newline.  The return status is 0 unless a write error occurs.  If -n is specified, the trailing newline is
         \\              suppressed.  If the -e option is given, interpretation of the following backslash-escaped characters is enabled.  The -E option disables the  interpretation  of
@@ -31,6 +33,9 @@ pub fn help() ERROR_CODES {
         \\              \uHHHH the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value HHHH (one to four hex digits)
         \\              \UHHHHHHHH
         \\                     the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value HHHHHHHH (one to eight hex digits)
+        \\
+        \\COPYRIGHT
+        \\              Copyright © 2024 Arnon Tzori.
     ;
 
     const stdout = std.io.getStdOut().writer();
