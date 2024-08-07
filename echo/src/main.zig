@@ -1,8 +1,5 @@
 const std = @import("std");
 const help = @import("./help.zig");
-const GenericWriter = help.GenericWriter;
-const File = std.fs.File;
-const ArgIterator = std.process.ArgIterator;
 const windows = std.os.windows;
 const exit = windows.kernel32.ExitProcess;
 
