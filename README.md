@@ -7,13 +7,13 @@
 - [License](#license)
 - [Contact](#contact)
 
-## About <a name = "about"></a>
+## About
 
 **Windows Builtins** is a Zig implementation of various GNU/Linux builtins and coreutils for Windows. The goal of this project is to provide commonly used *nix utilities to Windows users *without* providing a full POSIX compatibility layer. This project is not intended to be a full replacement for WSL or Cygwin, but rather a lightweight alternative for users who only need a few utilities.
 
 Because this project is not meant to be a true POSIX compatibility layer, some features of the original utilities may be missing or behave differently. For example, `ls -i` will display ID numbers instead of inode numbers.
 
-## How to build <a name = "how-to-build"></a>
+## How to build
 
 The project contains standalone programs. In order to build them, you will need to have Zig installed. You can download Zig from the [official website](https://ziglang.org/download/), or install it via `winget`:
 
@@ -62,10 +62,10 @@ Set-Alias -Name echo -Value C:\bin\echo.exe"@ >> $PROFILE
 . $PROFILE
 ```
 
-## License <a name = "license"></a>
+## License
 
 This project is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for details.
 
-## Contact <a name = "contact"></a>
+## Contact
 
 If you have any questions or suggestions, feel free to open an issue.
