@@ -2,10 +2,12 @@
 
 ## Table of Contents
 
-- [About](#about)
-- [How to build](#how-to-build)
-- [License](#license)
-- [Contact](#contact)
+- [Windows Builtins](#windows-builtins)
+  - [Table of Contents](#table-of-contents)
+  - [About](#about)
+  - [How to build](#how-to-build)
+  - [License](#license)
+  - [Contact](#contact)
 
 ## About
 
@@ -21,11 +23,10 @@ The project contains standalone programs. In order to build them, you will need 
 winget install -e --id zig.zig
 ```
 
-You can build the desired program by changing to the directory containing the program and running `zig build`. For example, to build `echo`:
+You can build the desired program by running `zig build`, specifying the target with the `exe_name` option. For example, to build `echo`:
 
 ```powershell
-cd echo
-zig build --release=small
+zig build -Dexe_name=echo --release=small
 ```
 
 This will produce an executable named `echo.exe` in the `zig-out/bin` directory. You can then run this executable from the command line:
