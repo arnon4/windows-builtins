@@ -34,9 +34,9 @@ jobs:
     - name: Generate Files List
       id: files
       run: |
-        files=$(find zig-out/bin -type f -name "*.exe")
-        newline_files=$(echo $files | tr ' ' '\n')
-        echo "files=$newline_files" >> $GITHUB_OUTPUT
+        $files = Get-ChildItem -Path zig-out/bin -Filter *.exe -Recurse | ForEach-Object { $_.FullName }
+        $newline_files = $files -join "`n"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "files=$newline_files"
 
     - name: Release
       uses: softprops/action-gh-release@v2
