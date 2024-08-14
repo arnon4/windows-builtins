@@ -55,12 +55,12 @@ pub fn ArgsParser() type {
         }
 
         pub fn parseArgs(self: *Self, argIterator: *ArgIterator) ?[]const u8 {
-            // skip the first argument
             if (!argIterator.skip()) {
                 return null;
             }
 
             var current_arg = argIterator.next();
+
             if (current_arg == null) {
                 return null;
             }
@@ -78,7 +78,6 @@ pub fn ArgsParser() type {
                     const arg = self.args_map.get(current_arg.?[2..]);
                     if (arg != null) {
                         arg.?.result.* = arg.?.on_found;
-                        break;
                     }
                 } else {
                     // parse short option
