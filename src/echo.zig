@@ -3,7 +3,9 @@ const windows = std.os.windows;
 const exit = windows.kernel32.ExitProcess;
 
 const help = @import("./common/help.zig");
-const ERROR_CODES = @import("./common/error-codes.zig").ERROR_CODES;
+const Parser = @import("./common/args-parser.zig");
+const ArgsParser = Parser.ArgsParser;
+const ERROR_CODE = @import("./common/error-codes.zig").ERROR_CODE;
 
 const help_string =
     \\       echo --help display this help and exit
@@ -38,80 +40,65 @@ pub fn main() void {
     _ = windows.kernel32.SetConsoleOutputCP(65001);
     var print_newline = true;
     var print_escapes = false;
+    var printed_help = false;
     const stdout = std.io.getStdOut().writer();
 
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
 
     var args = std.process.argsWithAllocator(allocator) catch {
-        exit(@intFromEnum(ERROR_CODES.NOT_ENOUGH_MEMORY));
+        exit(@intFromEnum(ERROR_CODE.NOT_ENOUGH_MEMORY));
     };
 
     defer args.deinit();
+    var possible_args = [_]Parser.args{
+        .{ .short_name = "n", .long_name = null, .result = &print_newline, .on_found = false },
+        .{ .short_name = "e", .long_name = null, .result = &print_escapes, .on_found = true },
+        .{ .short_name = "E", .long_name = null, .result = &print_escapes, .on_found = false },
+        .{ .short_name = null, .long_name = "help", .result = &printed_help, .on_found = true },
+    };
 
-    if (!args.skip()) {
-        exit(@intFromEnum(ERROR_CODES.SUCCESS));
+    var args_parser = ArgsParser().init(allocator, possible_args[0..]) catch {
+        exit(@intFromEnum(ERROR_CODE.NOT_ENOUGH_MEMORY));
+    };
+
+    defer args_parser.deinit();
+
+    var current_arg = args_parser.parseArgs(&args);
+
+    if (current_arg == null) {
+        exit(@intFromEnum(ERROR_CODE.SUCCESS));
     }
 
-    var current_arg = args.next();
-    var printed_help = false;
-    if (std.mem.eql(u8, current_arg.?, "--help")) {
-        current_arg = args.next();
-        if (current_arg == null) {
-            const code = help.help(help_string);
-            exit(@intFromEnum(code));
-        } else {
-            stdout.print("--help ", .{}) catch {
-                exit(@intFromEnum(ERROR_CODES.WRITE_FAULT));
-            };
-            printed_help = true;
-        }
-    }
-
-    var i: usize = 0;
-    while (!printed_help and current_arg != null) : (i += 1) {
-        if (current_arg.?[0] != '-') {
-            break;
-        }
-
-        for (current_arg.?[1..]) |char| {
-            switch (char) {
-                'e' => print_escapes = true,
-                'E' => print_escapes = false,
-                'n' => print_newline = false,
-                else => {
-                    break;
-                },
-            }
-        }
-
-        current_arg = args.next();
+    if (printed_help) {
+        const code = help.help(help_string);
+        exit(@intFromEnum(code));
     }
 
     if (!print_escapes) {
         while (current_arg != null) {
             stdout.print("{s}", .{current_arg.?}) catch {
-                exit(@intFromEnum(ERROR_CODES.WRITE_FAULT));
+                exit(@intFromEnum(ERROR_CODE.WRITE_FAULT));
             };
 
             current_arg = args.next();
             if (current_arg != null) {
                 stdout.print(" ", .{}) catch {
-                    exit(@intFromEnum(ERROR_CODES.WRITE_FAULT));
+                    exit(@intFromEnum(ERROR_CODE.WRITE_FAULT));
                 };
             }
         }
 
         if (print_newline) {
             stdout.print("\n", .{}) catch {
-                exit(@intFromEnum(ERROR_CODES.WRITE_FAULT));
+                exit(@intFromEnum(ERROR_CODE.WRITE_FAULT));
             };
         }
 
-        exit(@intFromEnum(ERROR_CODES.SUCCESS));
+        exit(@intFromEnum(ERROR_CODE.SUCCESS));
     }
 
-    i = 0;
+    var i: usize = 0;
     var char: u8 = undefined;
     var escape: bool = true;
     while (current_arg != null) {
@@ -122,7 +109,7 @@ pub fn main() void {
                 switch (current_arg.?[i]) {
                     'a' => char = 7,
                     'b' => char = 8,
-                    'c' => exit(@intFromEnum(ERROR_CODES.SUCCESS)),
+                    'c' => exit(@intFromEnum(ERROR_CODE.SUCCESS)),
                     'e', 'E' => char = 27,
                     'f' => char = 12,
                     'n' => char = 10,
@@ -189,7 +176,7 @@ pub fn main() void {
                         }
 
                         stdout.print("{u}", .{utf8}) catch {
-                            exit(@intFromEnum(ERROR_CODES.WRITE_FAULT));
+                            exit(@intFromEnum(ERROR_CODE.WRITE_FAULT));
                         };
                         continue;
                     },
@@ -206,11 +193,11 @@ pub fn main() void {
 
                         if (utf8 > 0x10FFFF) {
                             stdout.print("", .{}) catch {
-                                exit(@intFromEnum(ERROR_CODES.WRITE_FAULT));
+                                exit(@intFromEnum(ERROR_CODE.WRITE_FAULT));
                             };
                         } else {
                             stdout.print("{u}", .{utf8}) catch {
-                                exit(@intFromEnum(ERROR_CODES.WRITE_FAULT));
+                                exit(@intFromEnum(ERROR_CODE.WRITE_FAULT));
                             };
                         }
                         continue;
@@ -220,32 +207,32 @@ pub fn main() void {
             }
             if (!escape) {
                 stdout.print("{s}", .{&[_]u8{char}}) catch {
-                    exit(@intFromEnum(ERROR_CODES.WRITE_FAULT));
+                    exit(@intFromEnum(ERROR_CODE.WRITE_FAULT));
                 };
                 escape = true;
                 continue;
             }
 
             stdout.print("{c}", .{char}) catch {
-                exit(@intFromEnum(ERROR_CODES.WRITE_FAULT));
+                exit(@intFromEnum(ERROR_CODE.WRITE_FAULT));
             };
         }
 
         current_arg = args.next();
         if (current_arg != null) {
             stdout.print(" ", .{}) catch {
-                exit(@intFromEnum(ERROR_CODES.WRITE_FAULT));
+                exit(@intFromEnum(ERROR_CODE.WRITE_FAULT));
             };
         }
     }
 
     if (print_newline) {
         stdout.print("\n", .{}) catch {
-            exit(@intFromEnum(ERROR_CODES.WRITE_FAULT));
+            exit(@intFromEnum(ERROR_CODE.WRITE_FAULT));
         };
     }
 
-    exit(@intFromEnum(ERROR_CODES.SUCCESS));
+    exit(@intFromEnum(ERROR_CODE.SUCCESS));
 }
 
 fn hexToBinary(char: u8) u8 {

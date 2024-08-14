@@ -1,4 +1,4 @@
-pub const ERROR_CODES = enum(u8) {
+pub const ERROR_CODE = enum(u8) {
     SUCCESS = 0,
     NOT_ENOUGH_MEMORY = 8,
     BAD_ENVIRONMENT = 10,
