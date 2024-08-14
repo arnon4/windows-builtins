@@ -8,16 +8,33 @@ pub fn build(b: *std.Build) !void {
     defer arena.deinit();
     const allocator = arena.allocator();
 
+    const exe_name = b.option([]const u8, "exe_name", "Name of the executable to build");
+
     for (exes) |exe| {
-        const root_source_file = try std.mem.join(allocator, "", &[_][]const u8{ "src\\", exe, ".zig" });
+        if (exe_name) |name| {
+            if (std.mem.eql(u8, exe, name)) {
+                const root_source_file = try std.mem.join(allocator, "", &[_][]const u8{ "src\\", exe, ".zig" });
 
-        const executable = b.addExecutable(.{
-            .name = exe,
-            .root_source_file = b.path(root_source_file),
-            .target = target,
-            .optimize = optimize,
-        });
+                const executable = b.addExecutable(.{
+                    .name = exe,
+                    .root_source_file = b.path(root_source_file),
+                    .target = target,
+                    .optimize = optimize,
+                });
 
-        b.installArtifact(executable);
+                b.installArtifact(executable);
+            }
+        } else {
+            const root_source_file = try std.mem.join(allocator, "", &[_][]const u8{ "src\\", exe, ".zig" });
+
+            const executable = b.addExecutable(.{
+                .name = exe,
+                .root_source_file = b.path(root_source_file),
+                .target = target,
+                .optimize = optimize,
+            });
+
+            b.installArtifact(executable);
+        }
     }
 }
