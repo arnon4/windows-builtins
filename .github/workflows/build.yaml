@@ -3,11 +3,7 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      target:
-        description: Builtin to build
-        required: true
-        type: string
-      zig_verison:
+      zig_version:
         description: Zig version to use
         required: true
         type: string
@@ -33,11 +29,19 @@ jobs:
         version: ${{ inputs.zig_version }}
 
     - name: Build
-      working-directory: ${{ inputs.target }}
       run: zig build --release=small
+
+    - name: Generate Files List
+      id: files
+      run: |
+        $files = Get-ChildItem -Path zig-out/bin -Filter *.exe -Recurse | ForEach-Object { $_.FullName }
+        $newline_files = $files -join "`n"
+        $newline_files_escaped = $newline_files -replace "`n", "`n"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "files<<EOF`n$newline_files_escaped`nEOF"
+
 
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
-        files: ${{ inputs.target }}/zig-out/bin/${{ inputs.target }}.exe
+        files: ${{ steps.files.outputs.files }}
         tag_name: ${{ inputs.release_version }}
