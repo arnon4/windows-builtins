@@ -1,10 +1,27 @@
 const std = @import("std");
-const help = @import("./help.zig");
 const windows = std.os.windows;
 const exit = windows.kernel32.ExitProcess;
 
-const ERROR_CODES = help.ERROR_CODES;
+const help = @import("./common/help.zig");
+const ERROR_CODES = @import("./common/error-codes.zig").ERROR_CODES;
+
 const BUFFER_SIZE = 4096; // TODO use dynamic sizing or allocation if needed
+
+const help_string =
+    \\       printenv - print all or part of environment
+    \\
+    \\       printenv [OPTION]... [VARIABLE]...
+    \\
+    \\       Print the values of the specified environment VARIABLE(s).  If no VARIABLE is specified, print name and value pairs for them all.
+    \\
+    \\       -0, --null
+    \\              end each output line with NUL, not newline
+    \\
+    \\       --help display this help and exit
+    \\
+    \\COPYRIGHT
+    \\       Copyright © 2024 Arnon Tzori.
+;
 
 pub fn main() void {
     _ = windows.kernel32.SetConsoleOutputCP(65001);
@@ -26,7 +43,7 @@ pub fn main() void {
     }
 
     if (std.mem.eql(u8, current_arg.?, "--help")) {
-        const code = help.help();
+        const code = help.help(help_string);
         exit(@intFromEnum(code));
     }
 
