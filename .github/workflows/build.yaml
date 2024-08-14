@@ -36,7 +36,9 @@ jobs:
       run: |
         $files = Get-ChildItem -Path zig-out/bin -Filter *.exe -Recurse | ForEach-Object { $_.FullName }
         $newline_files = $files -join "`n"
-        Add-Content -Path $env:GITHUB_OUTPUT -Value "files=$newline_files"
+        $newline_files_escaped = $newline_files -replace "`n", "`n"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "files<<EOF`n$newline_files_escaped`nEOF"
+
 
     - name: Release
       uses: softprops/action-gh-release@v2
