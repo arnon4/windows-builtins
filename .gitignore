@@ -5,3 +5,7 @@ zig-out/
 /build/
 /build-*/
 /docgen_tmp/
+
+# powershell tests and results
+*.ps1
+*.txt
